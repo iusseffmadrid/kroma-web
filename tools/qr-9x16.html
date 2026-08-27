@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>KROMA. — QR 9:16</title>
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@200;300;400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{
+  --papel:#fff; --tinta:#080808; --linea:#e2e2e2;
+  --tenue:#b6b6b6; --gris-bajo:#8a8a8a; --gris:#5a5a5a;
+  --tipo:'Archivo','Helvetica Neue',Arial,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{color-scheme:light only;background:#0e0e0e;}
+body{
+  background:#0e0e0e;color:var(--tinta);font-family:var(--tipo);
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;gap:18px;padding:20px 12px 40px;
+  -webkit-font-smoothing:antialiased;
+}
+
+#previewWrap{width:100%;max-width:430px;}
+#lienzo{width:100%;height:auto;display:block;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.35);}
+
+.panel{width:100%;max-width:430px;}
+.rot{
+  font-size:9px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;
+  color:#8a8a8a;display:block;margin-bottom:8px;
+}
+input{
+  width:100%;padding:13px 14px;border:1px solid #2a2a2a;background:#161616;
+  color:#fff;font-family:var(--tipo);font-size:13px;font-weight:300;margin-bottom:10px;
+}
+input:focus{outline:none;border-color:#666;}
+button{
+  width:100%;padding:16px;border:none;cursor:pointer;
+  background:#fff;color:#080808;font-family:var(--tipo);
+  font-size:11.5px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:8px;
+}
+button.sec{background:transparent;color:#aaa;border:1px solid #2a2a2a;font-weight:300;letter-spacing:.2em;}
+.hint{font-size:10.5px;font-weight:300;color:#777;line-height:1.7;margin-top:10px;text-align:center;}
+</style>
+</head>
+<body>
+
+<div id="previewWrap"><canvas id="lienzo" width="1080" height="1920"></canvas></div>
+
+<div class="panel">
+  <span class="rot">Destino del QR</span>
+  <input id="destino" type="url" value="https://www.thisiskroma.com">
+  <button id="aplicar">Actualizar diseño</button>
+  <button class="sec" id="descargar">Descargar imagen 1080 × 1920</button>
+  <p class="hint">
+    Diseño vertical 9:16, listo para mostrar en pantalla completa del celular
+    o subir como historia. Escanéalo desde otro teléfono antes de usarlo en la feria.
+  </p>
+</div>
+
+<script>
+(function(){
+  var cv=document.getElementById('lienzo'), ctx=cv.getContext('2d');
+  var elDest=document.getElementById('destino');
+  var W=1080, H=1920;
+
+  if(typeof qrcode==='undefined'){
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#b00'; ctx.font='40px Archivo'; ctx.textAlign='center';
+    ctx.fillText('No cargó la librería de QR.',W/2,H/2);
+    return;
+  }
+
+  function pintarQR(texto,x,y,lado,margen){
+    var qr=qrcode(0,'H'); qr.addData(texto); qr.make();
+    var n=qr.getModuleCount(), total=n+margen*2, paso=lado/total;
+    ctx.fillStyle='#ffffff'; ctx.fillRect(x,y,lado,lado);
+    ctx.fillStyle='#080808';
+    for(var r=0;r<n;r++) for(var c=0;c<n;c++) if(qr.isDark(r,c))
+      ctx.fillRect(Math.round(x+(c+margen)*paso),Math.round(y+(r+margen)*paso),Math.ceil(paso),Math.ceil(paso));
+  }
+
+  function linea(x1,y,x2,color){
+    ctx.strokeStyle=color; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+  }
+
+  function marcaEsquina(x,y,w,dir,color){
+    ctx.strokeStyle=color; ctx.lineWidth=2.4;
+    ctx.beginPath();
+    if(dir==='tl'){ ctx.moveTo(x,y+w); ctx.lineTo(x,y); ctx.lineTo(x+w,y); }
+    else { ctx.moveTo(x-w,y); ctx.lineTo(x,y); ctx.lineTo(x,y-w); }
+    ctx.stroke();
+  }
+
+  function dibujar(){
+    var url=elDest.value.trim();
+    if(!url) return;
+    if(!/^https?:\/\//i.test(url)) url='https://'+url;
+
+    var M=84;
+
+    var g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#ffffff'); g.addColorStop(.52,'#f7f7f7'); g.addColorStop(1,'#ffffff');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    ctx.textAlign='center';
+    ctx.fillStyle='#8a8a8a';
+    ctx.font='600 30px Archivo, Helvetica, Arial, sans-serif';
+    ctx.save(); ctx.letterSpacing='2px';
+    ctx.fillText('PANAMA-BASED PRODUCTION HOUSE.', W/2, 152);
+    ctx.restore();
+
+    linea(M,196,W-M,'#e2e2e2');
+
+    ctx.fillStyle='#080808';
+    ctx.font='900 148px Archivo, Helvetica, Arial, sans-serif';
+    ctx.fillText('KROMA.', W/2, 400);
+
+    ctx.fillStyle='#8a8a8a';
+    ctx.font='600 20px Archivo, Helvetica, Arial, sans-serif';
+    ctx.save(); ctx.letterSpacing='1.5px';
+    ctx.fillText('COMMERCIALS • CORPORATE FILMS • WEDDINGS • BRANDED CONTENT', W/2, 452);
+    ctx.restore();
+
+    linea(M,528,W-M,'#e2e2e2');
+
+    var lado=760, qx=(W-lado)/2, qy=612;
+    marcaEsquina(qx-26,qy-26,34,'tl','#b6b6b6');
+    marcaEsquina(qx+lado+26,qy+lado+26,34,'br','#b6b6b6');
+
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.10)'; ctx.shadowBlur=40; ctx.shadowOffsetY=14;
+    ctx.fillStyle='#fff'; ctx.fillRect(qx-28,qy-28,lado+56,lado+56);
+    ctx.restore();
+    pintarQR(url,qx,qy,lado,2);
+
+    var yUrl=qy+lado+108;
+    ctx.fillStyle='#5a5a5a';
+    ctx.font='300 32px Archivo, Helvetica, Arial, sans-serif';
+    var urlVisible=url.replace(/^https?:\/\//,'').replace(/\/$/,'');
+    ctx.fillText(urlVisible, W/2, yUrl);
+
+    linea(M,H-140,W-M,'#e2e2e2');
+  }
+
+  document.getElementById('aplicar').addEventListener('click', function(){
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(dibujar); } else { dibujar(); }
+  });
+  document.getElementById('descargar').addEventListener('click', function(){
+    var a=document.createElement('a');
+    a.download='kroma-qr-9x16.png';
+    a.href=cv.toDataURL('image/png');
+    a.click();
+  });
+
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(dibujar); } else { dibujar(); }
+  window.addEventListener('load', function(){ setTimeout(dibujar, 300); });
+})();
+</script>
+
+</body>
+</html>
